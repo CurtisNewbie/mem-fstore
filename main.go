@@ -28,11 +28,12 @@ func main() {
 		dat, e := io.ReadAll(c.Request.Body)
 		ec.Log.Infof("len: %v", len(dat))
 		if e != nil {
-			ec.Log.Errorf("io.ReadAll, %v", e)
+			ec.Log.Errorf("Read data, %v", e)
 			return
 		}
 		mem_store[file] = dat
 	})
+
 	server.RawGet("/file", func(c *gin.Context, ec common.ExecContext) {
 		file := c.Query("file")
 		mu.RLock()
@@ -41,7 +42,7 @@ func main() {
 			c.Writer.Header().Set("Content-Disposition", `attachment; filename=`+url.QueryEscape(file))
 			c.Writer.Header().Set("Content-Length", strconv.FormatInt(int64(len(dat)), 10))
 			if _, e := io.Copy(c.Writer, bytes.NewReader(dat)); e != nil {
-				ec.Log.Errorf("c.Writer.Write, %v", e)
+				ec.Log.Errorf("Write data, %v", e)
 				return
 			}
 		}
