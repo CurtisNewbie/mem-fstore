@@ -6,6 +6,12 @@ It's useful when you don't care about security, and you only want to transfer fi
 
 Lets say the IP address of this app is `192.168.31.153`.
 
+To run the server:
+
+```sh
+./run.sh
+```
+
 ## Upload File
 
 ```sh
