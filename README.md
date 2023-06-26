@@ -15,7 +15,7 @@ curl 'http://192.168.31.153:8080/file/myfile.jpg' --data-binary @myfile.jpg; ech
 ## Download File
 
 ```sh
-curl http://192.168.31.153:8080/file/myfile.jpg -o myfile.jpg
+curl 'http://192.168.31.153:8080/file/myfile.jpg' -o myfile.jpg
 ```
 
 You can also type `http://192.168.31.153:8080/file/myfile.jpg` in your browser without using cURL.
