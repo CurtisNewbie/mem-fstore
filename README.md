@@ -9,13 +9,13 @@ Lets say the IP address of this app is `192.168.31.153`.
 ## Upload File
 
 ```sh
-curl -X PUT 'http://192.168.31.153:8080/file' --data-binary @myfile.jpg -H 'File:myfile.jpg'
+curl 'http://192.168.31.153:8080/file/myfile.jpg' --data-binary @myfile.jpg; echo;
 ```
 
 ## Download File
 
 ```sh
-curl -v http://192.168.31.153:8080/file?file=myfile.jpg -o myfile.jpg
+curl http://192.168.31.153:8080/file/myfile.jpg -o myfile.jpg
 ```
 
-You can also type `http://192.168.31.153:8080/file?file=myfile.jpg` in your browser.
+You can also type `http://192.168.31.153:8080/file/myfile.jpg` in your browser without using cURL.
