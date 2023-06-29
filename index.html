@@ -24,24 +24,27 @@
     </div>
 
     <script>
-        async function upload() {
+        function upload() {
+            const uploadBtn = document.getElementById("uploadBtn");
             const uploadFileInput = document.getElementById("uploadFile");
             if (uploadFileInput.files.length === 0) {
                 window.alert("Please select a file to upload");
                 return;
             }
 
-            f = uploadFileInput.files[0]
-            const formData = new FormData();
-            formData.append("file", f);
+            const f = uploadFileInput.files[0];
+            uploadFileInput.disabled = true;
+            uploadBtn.disabled = true;
 
             fetch(`/file/${f.name}`, {
                 method: "POST",
-                body: formData,
+                body: f,
             })
                 .finally(() => {
                     getList();
                     uploadFileInput.value = [];
+                    // uploadFileInput.disabled = false;
+                    uploadBtn.disabled = false;
                 })
                 .catch((error) => {
                     console.error("Error:", error);
@@ -80,6 +83,15 @@
                     window.alert("Failed to fetch file list");
                 });
         }
+
+        function getListTask() {
+            getList();
+            setTimeout(() => {
+                getListTask()
+            }, 10000);
+        }
+
+        getListTask();
     </script>
 </body>
 

@@ -8,6 +8,7 @@ import (
 	"os"
 	"strconv"
 	"sync"
+	"time"
 
 	"github.com/curtisnewbie/gocommon/common"
 	"github.com/curtisnewbie/gocommon/server"
@@ -47,14 +48,18 @@ func main() {
 
 	server.RawPost("/file/:file", func(c *gin.Context, ec common.ExecContext) {
 		file := c.Param("file")
-		mu.Lock()
-		defer mu.Unlock()
+		ec.Log.Infof("Reading data for file, %v", file)
 
+		start := time.Now()
 		dat, e := io.ReadAll(c.Request.Body)
 		if e != nil {
 			ec.Log.Errorf("Read data, %v", e)
 			return
 		}
+		took := time.Since(start)
+
+		mu.Lock()
+		defer mu.Unlock()
 		mem_store[file] = dat
 
 		url := fmt.Sprintf("http://%s:%s/file/%s",
@@ -62,7 +67,7 @@ func main() {
 			common.GetPropStr(common.PROP_SERVER_PORT),
 			url.QueryEscape(file),
 		)
-		ec.Log.Infof("File: %v, bytes: %v, url: '%v'", file, len(dat), url)
+		ec.Log.Infof("File: %v, bytes: %v, url: '%v', took: %v", file, len(dat), url, took)
 		c.Data(200, "text/plain", []byte(url))
 	})
 
