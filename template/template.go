@@ -48,7 +48,7 @@ const (
                 .finally(() => {
                     getList();
                     uploadFileInput.value = [];
-                    // uploadFileInput.disabled = false;
+                    uploadFileInput.disabled = false;
                     uploadBtn.disabled = false;
                 })
                 .catch((error) => {
