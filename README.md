@@ -2,7 +2,7 @@
 
 It's useful when you don't care about security, and you only want to transfer files between devices for like 10 minutes :D
 
-If `index.html` is found at root directory (where the executable is located), it loads and serves the index.html on `/` path.
+An index.html is embedded in source code, you can access it on `/` path.
 
 # Example
 

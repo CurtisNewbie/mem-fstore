@@ -1,4 +1,9 @@
-<!DOCTYPE html>
+package template
+
+const (
+
+    // compiled using build_template.py
+    IndexHtml = `<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -95,4 +100,7 @@
     </script>
 </body>
 
-</html>
+</html>`
+
+)
+

@@ -12,29 +12,21 @@ import (
 
 	"github.com/curtisnewbie/gocommon/common"
 	"github.com/curtisnewbie/gocommon/server"
+	"github.com/curtisnewbie/mem-store/template"
 	"github.com/gin-gonic/gin"
 )
 
 var (
 	mu        sync.RWMutex
 	mem_store map[string][]byte = make(map[string][]byte)
-	indexHtml []byte            = nil
 )
 
 func main() {
 
-	var err error
-	indexHtml, err = os.ReadFile("./index.html")
-	if err != nil && !os.IsNotExist(err) {
-		panic(err)
-	}
-
-	if indexHtml != nil {
-		server.RawGet("/", func(c *gin.Context, ec common.ExecContext) {
-			c.Header("Content-Type", "text/html")
-			_, _ = c.Writer.Write(indexHtml)
-		})
-	}
+	server.RawGet("/", func(c *gin.Context, ec common.ExecContext) {
+		c.Header("Content-Type", "text/html")
+		_, _ = c.Writer.Write([]byte(template.IndexHtml))
+	})
 
 	server.Get("/file/list", func(c *gin.Context, ec common.ExecContext) (any, error) {
 		mu.RLock()
@@ -88,6 +80,8 @@ func main() {
 
 	server.PostServerBootstrapped(func(c common.ExecContext) error {
 		c.Log.Infof("Upload file using cURL: 'curl 'http://%s:%s/file/YOUR_FILE_NAME' --data-binary @YOUR_FILE_NAME'",
+			common.GetLocalIPV4(), common.GetPropStr(common.PROP_SERVER_PORT))
+		c.Log.Infof("Access index.html on 'http://%s:%s'",
 			common.GetLocalIPV4(), common.GetPropStr(common.PROP_SERVER_PORT))
 		return nil
 	})
