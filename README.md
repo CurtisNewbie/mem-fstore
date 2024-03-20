@@ -8,22 +8,16 @@ An index.html is embedded in source code, you can access it on `/` path.
 
 Lets say the IP address of this app is `192.168.31.153`.
 
-To run the server:
+To upload file:
 
 ```sh
-./run.sh
+curl 'http://localhost:80/file?name=myfile.jpg' --data-binary @myfile.jpg; echo;
 ```
 
-## Upload File
+To download file:
 
 ```sh
-curl 'http://192.168.31.153:8080/file/myfile.jpg' --data-binary @myfile.jpg; echo;
+curl 'http://192.168.31.153:80/file?name=myfile.jpg' -o myfile.jpg
 ```
 
-## Download File
-
-```sh
-curl 'http://192.168.31.153:8080/file/myfile.jpg' -o myfile.jpg
-```
-
-You can also type `http://192.168.31.153:8080/file/myfile.jpg` in your browser without using cURL.
+You can also type `http://192.168.31.153:80/file?name=myfile.jpg` in your browser without using cURL.

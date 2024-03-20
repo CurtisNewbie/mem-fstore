@@ -71,7 +71,7 @@ func main() {
 		w, r := inb.Unwrap()
 		dat, e := io.ReadAll(r.Body)
 		if e != nil {
-			rail.Errorf("Read data, %v", e)
+			rail.Errorf("Failed to read data, %v", e)
 			return
 		}
 		took := time.Since(start)
@@ -80,15 +80,19 @@ func main() {
 		defer mu.Unlock()
 		mem_store[file] = dat
 
-		url := fmt.Sprintf("http://%s:%s/file/%s",
+		url := fmt.Sprintf("http://%s:%s/file?name=%s",
 			miso.GetLocalIPV4(),
 			miso.GetPropStr(miso.PropServerPort),
 			url.QueryEscape(file),
 		)
 		rail.Infof("File: %v, bytes: %v, url: '%v', took: %v", file, len(dat), url, took)
-		w.WriteHeader(200)
+
 		w.Header().Set("Content-Type", "text/plain")
-		w.Write([]byte(url))
+		if _, err := w.Write([]byte(url)); err != nil {
+			rail.Errorf("Failed to write file url, %v", e)
+			return
+		}
+		w.WriteHeader(200)
 
 		PrintMemStat(true)
 	})
@@ -105,7 +109,7 @@ func main() {
 			w.Header().Set("Content-Disposition", `attachment; filename=`+url.QueryEscape(file))
 			w.Header().Set("Content-Length", strconv.FormatInt(int64(len(dat)), 10))
 			if _, e := io.Copy(w, bytes.NewReader(dat)); e != nil {
-				rail.Errorf("Write data, %v", e)
+				rail.Errorf("Failed to transfer file, %v", e)
 				return
 			}
 		}
