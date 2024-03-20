@@ -20,7 +20,7 @@ var (
 )
 
 func init() {
-	miso.SetProp(miso.PropAppName, "mem-store")
+	miso.SetDefProp(miso.PropAppName, "mem-store")
 }
 
 func main() {
