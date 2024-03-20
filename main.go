@@ -10,10 +10,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/curtisnewbie/gocommon/common"
-	"github.com/curtisnewbie/gocommon/server"
 	"github.com/curtisnewbie/mem-store/template"
-	"github.com/gin-gonic/gin"
+	"github.com/curtisnewbie/miso/miso"
 )
 
 var (
@@ -21,14 +19,19 @@ var (
 	mem_store map[string][]byte = make(map[string][]byte)
 )
 
+func init() {
+	miso.SetProp(miso.PropAppName, "mem-store")
+}
+
 func main() {
 
-	server.RawGet("/", func(c *gin.Context, ec common.ExecContext) {
-		c.Header("Content-Type", "text/html")
-		_, _ = c.Writer.Write([]byte(template.IndexHtml))
+	miso.RawGet("/", func(inb *miso.Inbound) {
+		w, _ := inb.Unwrap()
+		w.Header().Set("Content-Type", "text/html")
+		w.Write([]byte(template.IndexHtml))
 	})
 
-	server.Get("/file/list", func(c *gin.Context, ec common.ExecContext) (any, error) {
+	miso.Get("/file/list", func(inb *miso.Inbound) (any, error) {
 		mu.RLock()
 		defer mu.RUnlock()
 		var keys []string = []string{}
@@ -38,14 +41,16 @@ func main() {
 		return keys, nil
 	})
 
-	server.RawPost("/file/:file", func(c *gin.Context, ec common.ExecContext) {
-		file := c.Param("file")
-		ec.Log.Infof("Reading data for file, %v", file)
+	miso.RawPost("/file", func(inb *miso.Inbound) {
+		rail := inb.Rail()
+		file := inb.Query("name")
+		rail.Infof("Reading data for file, %v", file)
 
 		start := time.Now()
-		dat, e := io.ReadAll(c.Request.Body)
+		w, r := inb.Unwrap()
+		dat, e := io.ReadAll(r.Body)
 		if e != nil {
-			ec.Log.Errorf("Read data, %v", e)
+			rail.Errorf("Read data, %v", e)
 			return
 		}
 		took := time.Since(start)
@@ -55,36 +60,41 @@ func main() {
 		mem_store[file] = dat
 
 		url := fmt.Sprintf("http://%s:%s/file/%s",
-			common.GetLocalIPV4(),
-			common.GetPropStr(common.PROP_SERVER_PORT),
+			miso.GetLocalIPV4(),
+			miso.GetPropStr(miso.PropServerPort),
 			url.QueryEscape(file),
 		)
-		ec.Log.Infof("File: %v, bytes: %v, url: '%v', took: %v", file, len(dat), url, took)
-		c.Data(200, "text/plain", []byte(url))
+		rail.Infof("File: %v, bytes: %v, url: '%v', took: %v", file, len(dat), url, took)
+		w.WriteHeader(200)
+		w.Header().Set("Content-Type", "text/plain")
+		w.Write([]byte(url))
 	})
 
-	server.RawGet("/file/:file", func(c *gin.Context, ec common.ExecContext) {
-		file := c.Param("file")
+	miso.RawGet("/file", func(c *miso.Inbound) {
+		rail := c.Rail()
+		file := c.Query("name")
+
 		mu.RLock()
 		defer mu.RUnlock()
+		w, _ := c.Unwrap()
 
 		if dat, ok := mem_store[file]; ok {
-			c.Writer.Header().Set("Content-Disposition", `attachment; filename=`+url.QueryEscape(file))
-			c.Writer.Header().Set("Content-Length", strconv.FormatInt(int64(len(dat)), 10))
-			if _, e := io.Copy(c.Writer, bytes.NewReader(dat)); e != nil {
-				ec.Log.Errorf("Write data, %v", e)
+			w.Header().Set("Content-Disposition", `attachment; filename=`+url.QueryEscape(file))
+			w.Header().Set("Content-Length", strconv.FormatInt(int64(len(dat)), 10))
+			if _, e := io.Copy(w, bytes.NewReader(dat)); e != nil {
+				rail.Errorf("Write data, %v", e)
 				return
 			}
 		}
 	})
 
-	server.PostServerBootstrapped(func(c common.ExecContext) error {
-		c.Log.Infof("Upload file using cURL: 'curl 'http://%s:%s/file/YOUR_FILE_NAME' --data-binary @YOUR_FILE_NAME'",
-			common.GetLocalIPV4(), common.GetPropStr(common.PROP_SERVER_PORT))
-		c.Log.Infof("Access index.html on 'http://%s:%s'",
-			common.GetLocalIPV4(), common.GetPropStr(common.PROP_SERVER_PORT))
+	miso.PostServerBootstrapped(func(rail miso.Rail) error {
+		rail.Infof("Upload file using cURL: 'curl 'http://%s:%s/file?name=YOUR_FILE_NAME' --data-binary @YOUR_FILE_NAME'",
+			miso.GetLocalIPV4(), miso.GetPropStr(miso.PropServerPort))
+		rail.Infof("Access index.html on 'http://%s:%s'",
+			miso.GetLocalIPV4(), miso.GetPropStr(miso.PropServerPort))
 		return nil
 	})
 
-	server.BootstrapServer(os.Args)
+	miso.BootstrapServer(os.Args)
 }

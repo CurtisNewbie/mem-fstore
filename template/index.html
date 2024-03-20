@@ -36,7 +36,7 @@
             uploadFileInput.disabled = true;
             uploadBtn.disabled = true;
 
-            fetch('/file/' + f.name, {
+            fetch(`/file?name=${encodeURIComponent(f.name)}`, {
                 method: "POST",
                 body: f,
             })
@@ -70,7 +70,7 @@
                         console.log(p)
                         let li = document.createElement("li");
                         let innerLink = document.createElement("a");
-                        innerLink.href = 'file/' + p;
+                        innerLink.href = `/file?name=${encodeURIComponent(p)}`;
                         innerLink.textContent = p;
                         li.appendChild(innerLink);
                         li.setAttribute("target", "_blank");
