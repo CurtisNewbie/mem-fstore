@@ -17,14 +17,34 @@ import (
 var (
 	mu        sync.RWMutex
 	mem_store map[string][]byte = make(map[string][]byte)
+
+	collector *miso.MetricsCollector
 )
 
 func init() {
 	miso.SetDefProp(miso.PropAppName, "mem-store")
-	miso.SetDefProp(miso.PropMetricsEnableMemStatsLogJob, true)
+	miso.SetDefProp(miso.PropServerPort, 80)
 }
 
 func main() {
+
+	miso.PreServerBootstrap(func(rail miso.Rail) error {
+		mc := miso.NewMetricsCollector(miso.DefaultMetricDesc(nil))
+		collector = &mc
+		return miso.ScheduleCron(miso.Job{
+			Name:            "MetricsMemStatLogJob",
+			CronWithSeconds: true,
+			Cron:            miso.GetPropStr(miso.PropMetricsMemStatsLogJobCron),
+			Run: func(r miso.Rail) error {
+				PrintMemStat(true)
+				return nil
+			},
+		})
+	})
+	miso.PostServerBootstrapped(func(rail miso.Rail) error {
+		PrintMemStat(true)
+		return nil
+	})
 
 	miso.RawGet("/", func(inb *miso.Inbound) {
 		w, _ := inb.Unwrap()
@@ -69,6 +89,8 @@ func main() {
 		w.WriteHeader(200)
 		w.Header().Set("Content-Type", "text/plain")
 		w.Write([]byte(url))
+
+		PrintMemStat(true)
 	})
 
 	miso.RawGet("/file", func(c *miso.Inbound) {
@@ -89,6 +111,19 @@ func main() {
 		}
 	})
 
+	miso.RawDelete("/file", func(c *miso.Inbound) {
+		file := c.Query("name")
+		if file == "" {
+			return
+		}
+
+		rail := c.Rail()
+		mu.Lock()
+		defer mu.Unlock()
+		delete(mem_store, file)
+		rail.Infof("Deleted file: %v", file)
+	})
+
 	miso.PostServerBootstrapped(func(rail miso.Rail) error {
 		rail.Infof("Upload file using cURL: 'curl 'http://%s:%s/file?name=YOUR_FILE_NAME' --data-binary @YOUR_FILE_NAME'",
 			miso.GetLocalIPV4(), miso.GetPropStr(miso.PropServerPort))
@@ -98,4 +133,14 @@ func main() {
 	})
 
 	miso.BootstrapServer(os.Args)
+}
+
+func PrintMemStat(read bool) {
+	if collector == nil {
+		return
+	}
+	if read {
+		collector.Read()
+	}
+	miso.Infof("\n\n%s", miso.SprintMemStats(collector.MemStats()))
 }

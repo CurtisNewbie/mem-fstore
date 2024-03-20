@@ -69,12 +69,31 @@
                     for (let p of result.data) {
                         console.log(p)
                         let li = document.createElement("li");
+                        let div = document.createElement("div");
+                        li.appendChild(div);
+
                         let innerLink = document.createElement("a");
                         innerLink.href = `/file?name=${encodeURIComponent(p)}`;
                         innerLink.textContent = p;
-                        li.appendChild(innerLink);
-                        li.setAttribute("target", "_blank");
-                        li.style.wordBreak = "break-all";
+                        div.appendChild(innerLink);
+
+                        let deleteBtn = document.createElement("button");
+                        deleteBtn.style.margin = "5px";
+                        deleteBtn.onclick = () => {
+                            fetch(`/file?name=${encodeURIComponent(p)}`, {
+                                method: "DELETE",
+                            }).finally(() => {
+                                getList();
+                            }).catch((error) => {
+                                console.error("Error:", error);
+                                window.alert("Failed to delete file");
+                            });
+                        }
+                        deleteBtn.textContent = "Delete";
+                        div.appendChild(deleteBtn);
+
+                        div.setAttribute("target", "_blank");
+                        div.style.wordBreak = "break-all";
                         ulist.appendChild(li);
                     }
                 })
