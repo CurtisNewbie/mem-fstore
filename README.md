@@ -1,4 +1,4 @@
-# In-memory File Store
+# In-Memory File Store
 
 It's useful when you don't care about security, and you only want to transfer files between devices for like 10 minutes :D
 
