@@ -21,6 +21,7 @@ var (
 
 func init() {
 	miso.SetDefProp(miso.PropAppName, "mem-store")
+	miso.SetDefProp(miso.PropMetricsEnableMemStatsLogJob, true)
 }
 
 func main() {
