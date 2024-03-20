@@ -10,12 +10,18 @@
 
 <body>
     <div>
-        <h2>In-Memory File Store</h2>
-        <div>
-            <h3>Upload File:</h3>
-            <input type="file" id="uploadFile">
+        <h2 style="margin:10px; padding:5px;">In-Memory File Store</h2>
+        <div style="margin-top:30px; margin-bottom: 30px;">
+            <span id="alertSpan" hidden="true"
+                style="margin:10px; padding: 10px; border-radius: 25px; background-color: lightcoral;"></span>
         </div>
-        <button type="button" id="uploadBtn" onclick="upload()">Upload</button>
+        <div>
+            <label class="file-upload-label">
+                Upload File:
+                <input type="file" id="uploadFile" size="60">
+            </label>
+            <button type="button" class="button" id="uploadBtn" onclick="upload()">Upload</button>
+        </div>
     </div>
 
     <div>
@@ -79,6 +85,7 @@
 
                         let deleteBtn = document.createElement("button");
                         deleteBtn.style.margin = "5px";
+                        deleteBtn.classList.add("button")
                         deleteBtn.onclick = () => {
                             fetch(`/file?name=${encodeURIComponent(p)}`, {
                                 method: "DELETE",
@@ -96,10 +103,12 @@
                         div.style.wordBreak = "break-all";
                         ulist.appendChild(li);
                     }
+
+                    alert(null);
                 })
                 .catch((error) => {
                     console.error("Error:", error);
-                    window.alert("Failed to fetch file list");
+                    alert(`Failed to fetch file list ${error}`);
                 });
         }
 
@@ -110,8 +119,37 @@
             }, 10000);
         }
 
+        function alert(msg) {
+            const span = document.getElementById("alertSpan");
+            if (msg) {
+                span.hidden = false;
+                span.textContent = msg;
+            } else {
+                span.hidden = true;
+            }
+        }
+
         getListTask();
     </script>
+
+    <style>
+        .button {
+            padding: 10px;
+            transition-duration: 0.4s;
+        }
+
+        .button:hover {
+            background-color: #555555;
+            color: white;
+        }
+
+        .file-upload-label {
+            border: 1px solid #ccc;
+            display: inline-block;
+            padding: 6px 12px;
+            cursor: pointer;
+        }
+    </style>
 </body>
 
 </html>

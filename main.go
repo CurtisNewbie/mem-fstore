@@ -34,7 +34,7 @@ func main() {
 		return miso.ScheduleCron(miso.Job{
 			Name:            "MetricsMemStatLogJob",
 			CronWithSeconds: true,
-			Cron:            miso.GetPropStr(miso.PropMetricsMemStatsLogJobCron),
+			Cron:            "0/30 * * * * *",
 			Run: func(r miso.Rail) error {
 				PrintMemStat(true)
 				return nil
