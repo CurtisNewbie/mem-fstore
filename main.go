@@ -6,6 +6,7 @@ import (
 	"io"
 	"net/url"
 	"os"
+	"runtime"
 	"strconv"
 	"sync"
 	"time"
@@ -126,6 +127,13 @@ func main() {
 		defer mu.Unlock()
 		delete(mem_store, file)
 		rail.Infof("Deleted file: %v", file)
+
+		// trigger GC manually, we don't really care about performance anyway
+		// but memory usage is quite a big problem
+		go func() {
+			runtime.GC()
+			PrintMemStat(true)
+		}()
 	})
 
 	miso.PostServerBootstrapped(func(rail miso.Rail) error {
