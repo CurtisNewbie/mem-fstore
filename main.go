@@ -10,7 +10,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/curtisnewbie/mem-store/template"
+	"github.com/curtisnewbie/mem-fstore/template"
 	"github.com/curtisnewbie/miso/miso"
 )
 

@@ -1,4 +1,4 @@
-module github.com/curtisnewbie/mem-store
+module github.com/curtisnewbie/mem-fstore
 
 go 1.20
 
