@@ -6,8 +6,6 @@ An index.html is embedded in source code, you can access it on `/` path.
 
 # Example
 
-Lets say the IP address of this app is `192.168.31.153`.
-
 To upload file:
 
 ```sh
@@ -17,7 +15,7 @@ curl 'http://localhost:80/file?name=myfile.jpg' --data-binary @myfile.jpg; echo;
 To download file:
 
 ```sh
-curl 'http://192.168.31.153:80/file?name=myfile.jpg' -o myfile.jpg
+curl 'http://localhost:80/file?name=myfile.jpg' -o myfile.jpg
 ```
 
-You can also type `http://192.168.31.153:80/file?name=myfile.jpg` in your browser without using cURL.
+You can also type `http://localhost:80/file?name=myfile.jpg` in your browser without using cURL.
